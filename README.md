@@ -41,6 +41,45 @@ lets the evaluator pick any trip and see the reconstructed route with its score.
 
 All numbers come from `reports/` and can be regenerated with the scripts below.
 
+## Final evaluation: 10 evaluator-test trips
+
+All 10 reserved evaluator trips were run through the deployed API (`POST /predict`) with the
+frozen model and decoder. Nothing was retrained or tuned on them, and scoring against their
+reference routes happened server-side.
+
+| | Classifier only | **Classifier + HMM** |
+|---|---|---|
+| Pointwise accuracy (observation-weighted, 19,674 fixes) | 91.3 % | **95.9 %** |
+| Route continuity (trip mean) | 93.4 % | **96.4 %** |
+| Route F1 (trip mean) | 87.7 % | **90.9 %** |
+| Trips with accuracy ≥ 95 % | | **7 / 10** |
+| Trips where the HMM beats the classifier | | **9 / 10** |
+| Total server time, all 10 trips | | **13.0 s** |
+
+| Trip | Fixes | Classifier | **HMM** | Continuity | Route F1 |
+|---|---|---|---|---|---|
+| 00000015 | 6,854 | 83.1 % | **94.9 %** | 99.8 % | 88.7 % |
+| 00000017 | 1,346 | 93.9 % | **93.1 %** | 87.0 % | 84.9 % |
+| 00000023 | 458 | 94.3 % | **95.9 %** | 98.7 % | 88.1 % |
+| 00000030 | 654 | 83.5 % | **88.7 %** | 91.4 % | 80.9 % |
+| 00000049 | 2,642 | 99.3 % | **99.6 %** | 99.4 % | 98.0 % |
+| 00000059 | 1,031 | 96.4 % | **96.6 %** | 93.0 % | 86.1 % |
+| 00000067 | 916 | 96.4 % | **96.5 %** | 99.1 % | 94.2 % |
+| 00000073 | 1,144 | 98.6 % | **98.7 %** | 99.1 % | 97.6 % |
+| 00000087 | 1,399 | 96.0 % | **98.4 %** | 98.9 % | 96.2 % |
+| 00000094 | 3,230 | 94.2 % | **95.1 %** | 97.9 % | 94.3 % |
+
+The evaluator score (95.9 %) is in line with student test (94.3 %), so the model generalises
+rather than overfitting the development trips. Trip 00000017 is the one case where decoding did not
+help: it lost 0.8 points, and its continuity is the lowest at 87 %. Its map
+(`reports/evaluator_test/maps/pred_00000017.html`) is the place to start for error analysis.
+
+Evidence lives in `reports/evaluator_test/`: `results.csv`, `summary.json` (with model and decoder
+checksums), `run_log.txt` (client side), `api_server_log.txt` (API terminal) and one Folium map per
+trip. The maps show GPS, road network and prediction only; the reference route is not drawn.
+To reproduce, start the API with `PATHSNAP_EVAL_DIR` pointing at the evaluator trips and run
+`python scripts/07_evaluator_run.py`.
+
 ---
 
 ## Contents
@@ -182,6 +221,7 @@ python scripts/03_train_models.py      # ~35 min  7 models, CV + student test ->
 python scripts/04_bayes_opt.py         # ~30 min  Optuna TPE                  -> artifacts/final_model.joblib
 python scripts/05_hmm_eval.py          # ~8 min   decoder tuning + comparison -> artifacts/hmm_config.json
 python scripts/06_results_summary.py   # seconds  reports/RESULTS.md
+python scripts/07_evaluator_run.py     # ~15 s    final evaluator run through the API (API must be running)
 ```
 
 The trained model and decoder config are already committed, so you can skip straight to deployment.
