@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PathSnap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="window" id="window">
+
+  <!-- Sidebar: source list of evaluation trips -->
+  <aside class="sidebar" aria-label="Trips">
+    <div class="sidebar-head">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 19c3-1 4-4 6-7s4-6 8-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="5" cy="19" r="2.2" fill="currentColor"/><circle cx="19" cy="5" r="2.2" fill="currentColor"/>
+        </svg>
+        <div>
+          <div class="brand-name">PathSnap</div>
+          <div class="brand-sub">Map-matching</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Evaluation Trips <span id="tripCount" class="count"></span></div>
+    <ul class="trip-list" id="tripList" role="listbox" aria-label="Evaluation trips" tabindex="0"></ul>
+
+    <div class="sidebar-foot">
+      <button class="conn" id="connBtn" type="button" aria-haspopup="dialog">
+        <span class="dot" id="connDot"></span>
+        <span class="conn-text">
+          <span id="connLabel">Connecting…</span>
+          <span id="connSub" class="conn-sub"></span>
+        </span>
+        <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main: toolbar + map + inspector -->
+  <main class="main">
+    <header class="toolbar">
+      <div class="title-block">
+        <h1 id="tripTitle">Select a trip</h1>
+        <p id="tripSub" class="subtitle">Choose an evaluation trip from the sidebar</p>
+      </div>
+
+      <div class="segmented" role="radiogroup" aria-label="Route layer" id="layerSeg">
+        <button type="button" role="radio" aria-checked="true" data-mode="hmm">HMM</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="clf">Classifier</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="both">Compare</button>
+      </div>
+
+      <button class="btn-primary" id="runBtn" type="button" disabled>
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Reconstruct Route</span>
+        <kbd>↵</kbd>
+      </button>
+    </header>
+
+    <div class="stage">
+      <div id="map" class="map" aria-label="Map"></div>
+
+      <div class="empty" id="emptyState">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 38c7-2 9-9 13-15s8-11 19-13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 6"/><circle cx="8" cy="38" r="3.5" fill="currentColor"/><circle cx="40" cy="10" r="3.5" fill="currentColor"/></svg>
+        <h2>No route yet</h2>
+        <p>Pick a trip, then press <b>Reconstruct Route</b> or <kbd>↵</kbd>.<br>The API runs the full pipeline and scores it on the server.</p>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+      <!-- Inspector -->
+      <section class="inspector" id="inspector" aria-label="Results" hidden>
+        <div class="hero-metric">
+          <div class="hero-label">Accuracy</div>
+          <div class="hero-value" id="mAcc">–</div>
+          <div class="delta" id="mDelta"></div>
+        </div>
+
+        <div class="group">
+          <div class="row"><span>Route continuity</span><b id="mCont">–</b></div>
+          <div class="row"><span>Route F1</span><b id="mF1">–</b></div>
+          <div class="row"><span>Route precision</span><b id="mPrec">–</b></div>
+          <div class="row"><span>Route recall</span><b id="mRec">–</b></div>
+        </div>
+
+        <div class="group-label">Classifier only</div>
+        <div class="group">
+          <div class="row"><span>Accuracy</span><b id="cAcc">–</b></div>
+          <div class="row"><span>Route continuity</span><b id="cCont">–</b></div>
+        </div>
+
+        <div class="group-label">Performance</div>
+        <div class="group">
+          <div class="timing" id="timingBar" aria-hidden="true"></div>
+          <div class="row"><span><i class="sw sw-cand"></i>Candidates</span><b id="tCand">–</b></div>
+          <div class="row"><span><i class="sw sw-clf"></i>Classifier</span><b id="tClf">–</b></div>
+          <div class="row"><span><i class="sw sw-hmm"></i>HMM decoding</span><b id="tHmm">–</b></div>
+          <div class="row"><span>Server total</span><b id="tTotal">–</b></div>
+        </div>
+
+        <div class="group-label">Legend</div>
+        <div class="legend">
+          <div><i class="lg lg-hmm"></i>Predicted route (HMM)</div>
+          <div><i class="lg lg-clf"></i>Classifier only</div>
+          <div><i class="lg lg-gps"></i>GPS observations <span class="hint">zoom in to see</span></div>
+          <div><i class="lg lg-net"></i>Road network</div>
+        </div>
+        <p class="footnote" id="mFoot"></p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Connection sheet -->
+<div class="sheet-backdrop" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">API Server</h3>
+    <p>Address of the PathSnap API running on Laptop 1.</p>
+    <label for="apiInput" class="field-label">URL</label>
+    <input id="apiInput" type="url" spellcheck="false" autocomplete="off" placeholder="http://192.168.1.20:8000">
+    <p class="sheet-status" id="sheetStatus"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn-secondary" id="sheetCancel">Cancel</button>
+      <button type="button" class="btn-primary small" id="sheetSave">Connect</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
 ![LightGBM](https://img.shields.io/badge/model-LightGBM%20(Bayesian--tuned)-2E7D32)
 ![HMM](https://img.shields.io/badge/decoder-HMM%20%2B%20Viterbi-6A1B9A)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
-![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![UI](https://img.shields.io/badge/UI-Leaflet%20web%20app-007AFF?logo=leaflet&logoColor=white)
 
 UE24CS352A Machine Learning · PathSnap hackathon · PES University, RR Campus
 
@@ -24,7 +24,7 @@ GPS fixes drift onto parallel streets, jump across buildings and drop out. PathS
 2. **Sequence decoding.** A Hidden Markov Model combines these probabilities with road-network
    connectivity. Viterbi decoding then picks the most likely *connected* route.
 
-The trained pipeline runs as a **FastAPI** service. The **Streamlit** UI lets the evaluator pick a trip,
+The trained pipeline runs as a **FastAPI** service. A macOS-style **web UI** lets the evaluator pick a trip,
 compare predicted routes on a map, and view its scores. Both services can run on one laptop or across two laptops.
 
 The frozen pipeline reached **95.89% pointwise accuracy** across **10 evaluator trips**.
@@ -32,7 +32,7 @@ The frozen pipeline reached **95.89% pointwise accuracy** across **10 evaluator 
 [Team handoff and crash course (PDF)](docs/PathSnap-Team-Handoff.pdf) ·
 [Editable handoff](docs/PathSnap-Team-Handoff.md)
 
-<p align="center"><img src="docs/ui_screenshot.jpg" width="820" alt="PathSnap evaluator UI showing a reconstructed route for trip 00000056"></p>
+<p align="center"><img src="docs/ui_web.jpg" width="820" alt="PathSnap web UI: trip list, reconstructed route for evaluator trip 00000087 and results inspector showing 98.4% accuracy"></p>
 
 ## Headline results (10 student-test trips, never used for training)
 
@@ -114,7 +114,7 @@ flowchart LR
     E --> F["HMM + Viterbi<br/>Dijkstra transitions"]
     F --> G["Route: one arc<br/>per GPS fix"]
     G --> H["FastAPI /predict"]
-    H --> I["Streamlit UI<br/>+ Folium map"]
+    H --> I["Web UI<br/>+ Leaflet map"]
     R[".route (reference)"] -. server-side scoring only .-> H
 ```
 
@@ -196,7 +196,9 @@ PathSnap/
 ├── src/pathsnap/          core library (io, geo, network, labels, features, models, metrics, hmm, pipeline, viz)
 ├── scripts/               analysis, training, evaluator runs, and Windows launchers
 ├── api/main.py            FastAPI backend   (Laptop 1)
-├── ui/app.py              Streamlit UI      (Laptop 2)
+├── ui/web/               web UI: index.html, styles.css, app.js   (Laptop 2)
+├── ui/serve.py            serves the web UI (standard library only)
+├── ui/app.py              Streamlit UI (fallback)
 ├── artifacts/             final_model.joblib · final_model_meta.json · hmm_config.json
 ├── reports/               result CSVs, experiment log, figures/, maps/ (Folium HTML), eda/, RESULTS.md
 ├── docs/                  screenshot, team handoff, and verified Windows dependencies
@@ -221,8 +223,9 @@ On Linux/macOS, use `.venv/bin/python` for the virtual environment's Python.
 
 For a local demo, extract the organiser ZIP so each trip is in `data/evaluator_test/<trip_id>/`
 with its `.track`, `.nodes`, `.arcs`, and `.route` files. Run
-[Start-API.cmd](scripts/windows/Start-API.cmd), then [Start-UI.cmd](scripts/windows/Start-UI.cmd).
-Open the [UI](http://127.0.0.1:8501) or [API docs](http://127.0.0.1:8000/docs).
+[Start-API.cmd](scripts/windows/Start-API.cmd), then [Start-Web-UI.cmd](scripts/windows/Start-Web-UI.cmd),
+which opens the [web UI](http://localhost:8080). [API docs](http://127.0.0.1:8000/docs) are on the API.
+The Streamlit fallback UI is still available through [Start-UI.cmd](scripts/windows/Start-UI.cmd).
 The API launcher accepts an alternate trip directory as its first argument. Use
 [Show-Model-Stats.cmd](scripts/windows/Show-Model-Stats.cmd) to display saved results.
 
@@ -267,12 +270,24 @@ INFO | POST /predict trip=00000056 : obs=3958  HMM acc=0.9576  classifier acc=0.
 **Laptop 2: UI**
 
 ```powershell
-$env:PATHSNAP_API = 'http://<laptop-1-ip>:8000'
-.\.venv\Scripts\python.exe -m streamlit run ui/app.py
+.\.venv\Scripts\python.exe ui\serve.py --api http://<laptop-1-ip>:8000
 ```
 
-The UI lists the evaluation trips, sends the chosen id to the API and draws the GPS fixes, nearby road
-network and predicted route on a Folium map with layer controls. To check the API from either laptop:
+or `scripts\windows\Start-Web-UI.cmd http://<laptop-1-ip>:8000`. The browser opens at
+`http://localhost:8080`. The web UI needs nothing beyond Python's standard library; the map library
+and basemap load from the internet. The API address can also be changed in the UI, from the
+connection status at the bottom of the sidebar.
+
+| Area | What it does |
+|---|---|
+| Sidebar | the 10 evaluation trips from `GET /trips`; each shows its accuracy once reconstructed |
+| Toolbar | **Reconstruct Route** sends `POST /predict`; the HMM / Classifier / Compare control switches route layers |
+| Map | road network, GPS fixes (shown once they are far enough apart on screen), predicted route, start and end |
+| Inspector | accuracy and gain over the classifier, continuity, route F1/precision/recall, per-stage timing |
+
+Keyboard: `↑` / `↓` choose a trip, `Enter` reconstructs, `1` `2` `3` switch layers. Light and dark mode
+follow the operating system. If you prefer Streamlit:
+`$env:PATHSNAP_API='http://<laptop-1-ip>:8000'; .\.venv\Scripts\python.exe -m streamlit run ui/app.py`. To check the API from either laptop:
 `python scripts/api_smoke_test.py http://<laptop-1-ip>:8000`.
 
 ## API reference
@@ -302,7 +317,7 @@ Interactive docs are served at `http://<host>:8000/docs`.
 | Shryes | [@Shryes19](https://github.com/Shryes19) | data loading, cleaning, EDA, results summary |
 | Shubham Bhat | [@Shubhambhat06](https://github.com/Shubhambhat06) | road network, candidate generation, labelling, feature engineering |
 | Siddhant Anil | [@SiRex750](https://github.com/SiRex750) | model zoo, metrics, model comparison, Bayesian optimisation |
-| Siddhant Khurdiya | [@sidd2006](https://github.com/sidd2006) | HMM/Viterbi, inference pipeline, FastAPI, Streamlit UI, deployment |
+| Siddhant Khurdiya | [@sidd2006](https://github.com/sidd2006) | HMM/Viterbi, inference pipeline, FastAPI, web UI, deployment |
 
 Branch-by-branch ownership and each member's viva checklist are in [TEAM.md](TEAM.md).
 
