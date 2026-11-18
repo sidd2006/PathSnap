@@ -43,11 +43,11 @@ if res:
     m = res.get("metrics")
     if m:
         c = st.columns(5)
-        c[0].metric("Accuracy (HMM)", f"{m['hmm']['accuracy']:.2%}",
-                    f"{(m['hmm']['accuracy'] - m['classifier']['accuracy']) * 100:+.2f} pts vs classifier")
-        c[1].metric("Route continuity", f"{m['hmm']['route_continuity']:.2%}")
-        c[2].metric("Route F1", f"{m['hmm']['route_f1']:.2%}")
-        c[3].metric("Classifier-only accuracy", f"{m['classifier']['accuracy']:.2%}")
+        c[0].metric("Accuracy (HMM)", f"{m['hmm']['accuracy']:.1%}",
+                    f"{(m['hmm']['accuracy'] - m['classifier']['accuracy']) * 100:+.1f} pts vs classifier")
+        c[1].metric("Route continuity", f"{m['hmm']['route_continuity']:.1%}")
+        c[2].metric("Route F1", f"{m['hmm']['route_f1']:.1%}")
+        c[3].metric("Classifier-only accuracy", f"{m['classifier']['accuracy']:.1%}")
         c[4].metric("API time", f"{res['server_time_s']:.2f}s")
 
     gps = res["gps"]
