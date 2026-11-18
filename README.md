@@ -41,6 +41,30 @@ lets the evaluator pick any trip and see the reconstructed route with its score.
 
 All numbers come from `reports/` and can be regenerated with the scripts below.
 
+### Evaluator-test results (10 trips)
+
+The supplied evaluator dataset contains 19,674 cleaned GPS observations. The committed
+LightGBM model and HMM configuration were evaluated without retraining or tuning.
+
+| Metric | Classifier only | Classifier + HMM |
+|---|---:|---:|
+| Pointwise accuracy (observation-weighted) | 91.25% | **95.89%** |
+| Route continuity (mean across trips) | 93.40% | **96.43%** |
+| Route F1 (mean across trips) | 87.71% | **90.91%** |
+| Trips with accuracy ≥ 95% | 5 / 10 | **7 / 10** |
+
+Extract the organiser archive to `data/evaluator_test/<trip_id>/`, then run:
+
+```bash
+python scripts/evaluate_dataset.py --data data/evaluator_test
+```
+
+The script loads reference routes only after prediction for scoring. Per-trip results,
+summary metrics, input/model hashes and runtime versions are saved in
+[`reports/evaluator_test/`](reports/evaluator_test/RESULTS.md). Raw trip data stays git-ignored.
+To use these trips in the API on Windows, set `PATHSNAP_EVAL_DIR=data\evaluator_test`
+before starting Uvicorn.
+
 ---
 
 ## Contents
