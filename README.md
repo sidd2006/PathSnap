@@ -4,7 +4,7 @@
 
 **Machine-learning map-matching and route reconstruction for noisy GPS trajectories**
 
-![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Windows%20verified-Python%203.13.2-3776AB?logo=python&logoColor=white)
 ![LightGBM](https://img.shields.io/badge/model-LightGBM%20(Bayesian--tuned)-2E7D32)
 ![HMM](https://img.shields.io/badge/decoder-HMM%20%2B%20Viterbi-6A1B9A)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
@@ -24,8 +24,13 @@ GPS fixes drift onto parallel streets, jump across buildings and drop out. PathS
 2. **Sequence decoding.** A Hidden Markov Model combines these probabilities with road-network
    connectivity. Viterbi decoding then picks the most likely *connected* route.
 
-The trained pipeline runs as a **FastAPI** service on one laptop. A **Streamlit** UI on a second laptop
-lets the evaluator pick any trip and see the reconstructed route with its score.
+The trained pipeline runs as a **FastAPI** service. The **Streamlit** UI lets the evaluator pick a trip,
+compare predicted routes on a map, and view its scores. Both services can run on one laptop or across two laptops.
+
+The frozen pipeline reached **95.89% pointwise accuracy** across **10 evaluator trips**.
+[Final evaluation](#final-evaluation-10-evaluator-test-trips) ·
+[Team handoff and crash course (PDF)](docs/PathSnap-Team-Handoff.pdf) ·
+[Editable handoff](docs/PathSnap-Team-Handoff.md)
 
 <p align="center"><img src="docs/ui_screenshot.jpg" width="820" alt="PathSnap evaluator UI showing a reconstructed route for trip 00000056"></p>
 
@@ -49,9 +54,9 @@ reference routes happened server-side.
 
 | | Classifier only | **Classifier + HMM** |
 |---|---|---|
-| Pointwise accuracy (observation-weighted, 19,674 fixes) | 91.3 % | **95.9 %** |
-| Route continuity (trip mean) | 93.4 % | **96.4 %** |
-| Route F1 (trip mean) | 87.7 % | **90.9 %** |
+| Pointwise accuracy (observation-weighted, 19,674 fixes) | 91.25% | **95.89%** |
+| Route continuity (trip mean) | 93.40% | **96.43%** |
+| Route F1 (trip mean) | 87.71% | **90.91%** |
 | Trips with accuracy ≥ 95 % | 5 / 10 | **7 / 10** |
 | Trips where the HMM beats the classifier | | **9 / 10** |
 | Total server time, all 10 trips | | **13.0 s** |
@@ -69,18 +74,17 @@ reference routes happened server-side.
 | 00000087 | 1,399 | 96.0 % | **98.4 %** | 98.9 % | 96.2 % |
 | 00000094 | 3,230 | 94.2 % | **95.1 %** | 97.9 % | 94.3 % |
 
-The evaluator score (95.9 %) is in line with student test (94.3 %), so the model generalises
-rather than overfitting the development trips. Trip 00000017 is the one case where decoding did not
-help: it lost 0.8 points, and its continuity is the lowest at 87 %. Its map
-(`reports/evaluator_test/maps/pred_00000017.html`) is the place to start for error analysis.
+The evaluator accuracy of 95.89% compares with 94.31% on the student-test split.
+On trip 00000017, decoding lowered pointwise accuracy by 0.82 percentage points while
+improving continuity from 85.28% to 86.99%. [View the prediction map](reports/evaluator_test/maps/pred_00000017.html).
 
 The evaluation was run twice, independently, and the two runs agree to every digit (same model
 checksum `c391c21d…`):
 
 | Run | How | Reproduce | Evidence in `reports/evaluator_test/` |
 |---|---|---|---|
-| Through the deployed API | `GET /trips` then `POST /predict` for each trip, exactly as the UI does | start the API with `PATHSNAP_EVAL_DIR=data\evaluator_test`, then `python scripts/07_evaluator_run.py` | `results.csv`, `summary.json`, `run_log.txt` (client), `api_server_log.txt` (API terminal), `maps/pred_<trip>.html` |
-| Offline, direct pipeline | loads the committed artifacts and scores after prediction | `python scripts/evaluate_dataset.py --data data/evaluator_test` | `RESULTS.md`, `per_trip.csv`, `summary.csv`, `provenance.json` (input and artifact SHA-256, runtime versions) |
+| Through the deployed API | `GET /trips` then `POST /predict` for each trip, as the UI does | start the API on the evaluator data, then run `python scripts/07_evaluator_run.py` | `results.csv`, `summary.json`, `maps/pred_<trip>.html` |
+| Offline, direct pipeline | loads the committed artifacts and scores after prediction | `python scripts/evaluate_dataset.py --data data/evaluator_test --output data/evaluator_rerun` | `RESULTS.md`, `per_trip.csv`, `summary.csv`, `provenance.json` (input and artifact SHA-256, runtime versions) |
 
 The maps show GPS, road network and prediction only; the reference route is not drawn. Raw
 evaluator data stays git-ignored.
@@ -130,7 +134,7 @@ flowchart LR
 |---|---|---|---|
 | Train | 80 | 208,417 | fitting, cross-validation, Bayesian optimisation, decoder tuning |
 | Student test | 10 | 19,160 | development-stage comparison |
-| Evaluator test | 10 | | final evaluation only (never seen during development) |
+| Evaluator test | 10 | 19,674 | final evaluation with the committed model and decoder |
 
 Things we found while exploring the data (`scripts/01_eda.py`, `reports/eda/`):
 
@@ -190,27 +194,41 @@ over β alone, from 0.125 to 32. Accuracy peaks at β = 1, in the middle of that
 ```
 PathSnap/
 ├── src/pathsnap/          core library (io, geo, network, labels, features, models, metrics, hmm, pipeline, viz)
-├── scripts/               01_eda → 02_build_features → 03_train_models → 04_bayes_opt → 05_hmm_eval → 06_results_summary
+├── scripts/               analysis, training, evaluator runs, and Windows launchers
 ├── api/main.py            FastAPI backend   (Laptop 1)
 ├── ui/app.py              Streamlit UI      (Laptop 2)
 ├── artifacts/             final_model.joblib · final_model_meta.json · hmm_config.json
 ├── reports/               result CSVs, experiment log, figures/, maps/ (Folium HTML), eda/, RESULTS.md
-├── docs/                  screenshots
+├── docs/                  screenshot, team handoff, and verified Windows dependencies
 ├── requirements.txt
 └── TEAM.md                ownership and viva checklist
 ```
 
 ## Quick start
 
-```bash
-git clone https://github.com/sidd2006/PathSnap.git
+The trained model and HMM configuration are included. Setup was verified on Windows with Python 3.13.2.
+
+```powershell
+git clone git@github.com:sidd2006/PathSnap.git
 cd PathSnap
 python -m venv .venv
-.venv\Scripts\activate                 # Windows   |   source .venv/bin/activate  (Linux/macOS)
-pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts\show_results.py all
 ```
 
-Place the organiser data (not committed) like this:
+For exact package versions, see the [verified Windows environment](docs/requirements-windows-tested.txt).
+On Linux/macOS, use `.venv/bin/python` for the virtual environment's Python.
+
+For a local demo, extract the organiser ZIP so each trip is in `data/evaluator_test/<trip_id>/`
+with its `.track`, `.nodes`, `.arcs`, and `.route` files. Run
+[Start-API.cmd](scripts/windows/Start-API.cmd), then [Start-UI.cmd](scripts/windows/Start-UI.cmd).
+Open the [UI](http://127.0.0.1:8501) or [API docs](http://127.0.0.1:8000/docs).
+The API launcher accepts an alternate trip directory as its first argument. Use
+[Show-Model-Stats.cmd](scripts/windows/Show-Model-Stats.cmd) to display saved results.
+
+### Reproduce the original training experiments
+
+Place the original organiser training and student-test data like this:
 
 ```
 data/train/<trip_id>/<trip_id>.{track,nodes,arcs,route}
@@ -226,7 +244,6 @@ python scripts/03_train_models.py      # ~35 min  7 models, CV + student test ->
 python scripts/04_bayes_opt.py         # ~30 min  Optuna TPE                  -> artifacts/final_model.joblib
 python scripts/05_hmm_eval.py          # ~8 min   decoder tuning + comparison -> artifacts/hmm_config.json
 python scripts/06_results_summary.py   # seconds  reports/RESULTS.md
-python scripts/07_evaluator_run.py     # ~15 s    final evaluator run through the API (API must be running)
 ```
 
 The trained model and decoder config are already committed, so you can skip straight to deployment.
@@ -235,9 +252,9 @@ The trained model and decoder config are already committed, so you can skip stra
 
 **Laptop 1: model + API**
 
-```bash
-set PATHSNAP_EVAL_DIR=D:\evaluator_trips          # folder holding the 10 evaluation trips
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+```powershell
+$env:PATHSNAP_EVAL_DIR = (Resolve-Path 'data/evaluator_test').Path
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Find the LAN IP with `ipconfig` and allow port 8000 through Windows Defender Firewall. Every request is
@@ -249,9 +266,9 @@ INFO | POST /predict trip=00000056 : obs=3958  HMM acc=0.9576  classifier acc=0.
 
 **Laptop 2: UI**
 
-```bash
-set PATHSNAP_API=http://<laptop-1-ip>:8000
-streamlit run ui/app.py
+```powershell
+$env:PATHSNAP_API = 'http://<laptop-1-ip>:8000'
+.\.venv\Scripts\python.exe -m streamlit run ui/app.py
 ```
 
 The UI lists the evaluation trips, sends the chosen id to the API and draws the GPS fixes, nearby road
