@@ -1,0 +1,28 @@
+{
+  "run_time": "2026-11-18 15:25:07",
+  "api": "http://localhost:8000",
+  "n_trips": 10,
+  "n_obs": 19674,
+  "model": "LightGBM (Bayesian-tuned)",
+  "hmm_config": {
+    "beta": 1.0,
+    "emission_weight": 1.0,
+    "backward_penalty": 5.0,
+    "cutoff_factor": 2.0,
+    "cutoff_extra": 150.0,
+    "eps": 0.0001
+  },
+  "final_model_sha256_16": "c391c21d06832139",
+  "hmm_config_sha256_16": "4cee3a8a0cef96c9",
+  "hmm_accuracy_obs_weighted": 0.9589305682626816,
+  "clf_accuracy_obs_weighted": 0.9124733150350717,
+  "hmm_accuracy_trip_mean": 0.9574949504031591,
+  "clf_accuracy_trip_mean": 0.9357205588689863,
+  "hmm_route_continuity_mean": 0.9643379704300165,
+  "clf_route_continuity_mean": 0.9339910288120036,
+  "hmm_route_f1_mean": 0.9090988775620428,
+  "clf_route_f1_mean": 0.8770823279778266,
+  "trips_hmm_acc_ge_95": 7,
+  "trips_where_hmm_beats_classifier": 9,
+  "server_time_s_total": 12.969
+}
