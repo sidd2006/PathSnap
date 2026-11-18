@@ -17,7 +17,7 @@ UE24CS352A Machine Learning · PathSnap hackathon · PES University, RR Campus
 ---
 
 GPS fixes drift onto parallel streets, jump across buildings and drop out. PathSnap snaps a
-~1 Hz GPS trace back onto the road network in two stages:
+~1 Hz GPS trace back onto the road network in two0 stages:
 
 1. **Candidate scoring.** For every GPS fix, the nearby road arcs become candidates. A gradient-boosted
    classifier estimates the probability that each candidate is the road actually driven.
