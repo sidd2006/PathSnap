@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-11-18 15:25:07",
+  "run_time": "2026-11-18 16:42:39",
   "api": "http://localhost:8000",
   "n_trips": 10,
   "n_obs": 19674,
@@ -24,5 +24,5 @@
   "clf_route_f1_mean": 0.8770823279778266,
   "trips_hmm_acc_ge_95": 7,
   "trips_where_hmm_beats_classifier": 9,
-  "server_time_s_total": 12.969
+  "server_time_s_total": 12.153
 }
