@@ -1,0 +1,12 @@
+# raw dataset is distributed by the organisers - not committed
+data/
+# large intermediate feature tables (rebuild with scripts/02_build_features.py)
+cache/
+# per-model experiment checkpoints (re-created by scripts/03_train_models.py)
+artifacts/models/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.streamlit/secrets.toml
+.env
