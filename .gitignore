@@ -5,6 +5,7 @@ cache/
 # per-model experiment checkpoints (re-created by scripts/03_train_models.py)
 artifacts/models/
 .venv/
+venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
