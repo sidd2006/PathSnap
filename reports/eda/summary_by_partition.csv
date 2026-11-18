@@ -1,0 +1,3 @@
+partition,trips,obs_total,obs_mean,length_km_mean,dt_frac_1s,dt_max,gaps_gt5s,nodes_mean,arcs_mean,isolated_nodes,route_continuity,nonfinite,duplicate_t
+student_test,10,19160,1916.0,29.69678162623149,0.9819896936551981,210.0,44,9068.9,18504.1,0,0.9997319034852546,0,0
+train,80,208417,2605.2125,37.23018857364184,0.9382961036581522,153064.0,1216,24168.5625,48461.3,0,0.9993461551444497,0,0
