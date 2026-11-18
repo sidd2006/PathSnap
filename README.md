@@ -52,7 +52,7 @@ reference routes happened server-side.
 | Pointwise accuracy (observation-weighted, 19,674 fixes) | 91.3 % | **95.9 %** |
 | Route continuity (trip mean) | 93.4 % | **96.4 %** |
 | Route F1 (trip mean) | 87.7 % | **90.9 %** |
-| Trips with accuracy ≥ 95 % | | **7 / 10** |
+| Trips with accuracy ≥ 95 % | 5 / 10 | **7 / 10** |
 | Trips where the HMM beats the classifier | | **9 / 10** |
 | Total server time, all 10 trips | | **13.0 s** |
 
@@ -74,11 +74,16 @@ rather than overfitting the development trips. Trip 00000017 is the one case whe
 help: it lost 0.8 points, and its continuity is the lowest at 87 %. Its map
 (`reports/evaluator_test/maps/pred_00000017.html`) is the place to start for error analysis.
 
-Evidence lives in `reports/evaluator_test/`: `results.csv`, `summary.json` (with model and decoder
-checksums), `run_log.txt` (client side), `api_server_log.txt` (API terminal) and one Folium map per
-trip. The maps show GPS, road network and prediction only; the reference route is not drawn.
-To reproduce, start the API with `PATHSNAP_EVAL_DIR` pointing at the evaluator trips and run
-`python scripts/07_evaluator_run.py`.
+The evaluation was run twice, independently, and the two runs agree to every digit (same model
+checksum `c391c21d…`):
+
+| Run | How | Reproduce | Evidence in `reports/evaluator_test/` |
+|---|---|---|---|
+| Through the deployed API | `GET /trips` then `POST /predict` for each trip, exactly as the UI does | start the API with `PATHSNAP_EVAL_DIR=data\evaluator_test`, then `python scripts/07_evaluator_run.py` | `results.csv`, `summary.json`, `run_log.txt` (client), `api_server_log.txt` (API terminal), `maps/pred_<trip>.html` |
+| Offline, direct pipeline | loads the committed artifacts and scores after prediction | `python scripts/evaluate_dataset.py --data data/evaluator_test` | `RESULTS.md`, `per_trip.csv`, `summary.csv`, `provenance.json` (input and artifact SHA-256, runtime versions) |
+
+The maps show GPS, road network and prediction only; the reference route is not drawn. Raw
+evaluator data stays git-ignored.
 
 ---
 
