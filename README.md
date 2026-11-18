@@ -59,7 +59,7 @@ reference routes happened server-side.
 | Route F1 (trip mean) | 87.71% | **90.91%** |
 | Trips with accuracy ≥ 95 % | 5 / 10 | **7 / 10** |
 | Trips where the HMM beats the classifier | | **9 / 10** |
-| Total server time, all 10 trips | | **13.0 s** |
+| Total server time, all 10 trips | | **12.2 s** |
 
 | Trip | Fixes | Classifier | **HMM** | Continuity | Route F1 |
 |---|---|---|---|---|---|
