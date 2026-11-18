@@ -1,0 +1,54 @@
+{
+  "model": "LightGBM (Bayesian-tuned)",
+  "params": {
+    "n_estimators": 581,
+    "learning_rate": 0.08341106432362087,
+    "num_leaves": 19,
+    "min_child_samples": 292,
+    "subsample": 0.9162213204002109,
+    "colsample_bytree": 0.6061695553391381,
+    "reg_lambda": 0.005337032762603957,
+    "reg_alpha": 0.00541524411940254
+  },
+  "features": [
+    "dist",
+    "dist_rank",
+    "dist_minus_min",
+    "dist_ratio",
+    "gauss_prior",
+    "head_diff",
+    "head_cos",
+    "speed",
+    "moving",
+    "dt_prev",
+    "dt_next",
+    "arc_len",
+    "t_proj",
+    "at_end",
+    "n_cands",
+    "ctx_dist_mean",
+    "ctx_dist_max",
+    "ctx_head_diff",
+    "out_deg_to",
+    "in_deg_from",
+    "has_twin"
+  ],
+  "candidate_config": {
+    "radius": 50.0,
+    "fallback_radius": 120.0,
+    "k": 12
+  },
+  "label_max_dist": 60.0,
+  "seed": 42,
+  "metrics": {
+    "model": "LightGBM (tuned)",
+    "cv_macro_f1": 0.9403755719930302,
+    "cv_macro_f1_std": 0.01601137652113543,
+    "cv_top1": 0.8969154564924198,
+    "test_top1": 0.9001565762004176,
+    "test_macro_f1": 0.9384318504580784,
+    "test_log_loss": 0.06623794313234532,
+    "train_time_s": 16.826448200001323,
+    "inference_ms_per_1k_rows": 3.644580698266942
+  }
+}
