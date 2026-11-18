@@ -78,7 +78,29 @@ Decoder configuration: `{"beta": 1.0, "emission_weight": 1.0, "backward_penalty"
 |  00000077 |    3911 |         0.7827 |         0.8624 |                 0.9409 |                 0.9941 |         0.8919 |         0.9487 |            0 |         1.4142 |
 |  00000091 |     874 |         0.9027 |         0.9359 |                 0.9175 |                 0.9714 |         0.8465 |         0.8627 |            0 |         0.4394 |
 
-## 5. Figures and maps
+## 5. Final evaluation: 10 evaluator-test trips (via the API)
+
+Run 2026-11-18 15:25:07 through `POST /predict`; model checksum `c391c21d06832139`, decoder checksum `4cee3a8a0cef96c9` (frozen; nothing tuned on these trips).
+
+- Pointwise accuracy (observation-weighted): classifier 0.9125 -> HMM **0.9589**
+- Route continuity (trip mean): 0.9340 -> **0.9643**
+- Route F1 (trip mean): 0.8771 -> **0.9091**
+- Trips with HMM accuracy >= 95%: 7/10; HMM better than classifier on 9/10 trips; total server time 13.0 s
+
+|   trip_id |   n_obs |   clf_accuracy |   hmm_accuracy |   clf_route_continuity |   hmm_route_continuity |   clf_route_f1 |   hmm_route_f1 |   hmm_breaks |   server_time_s |
+|----------:|--------:|---------------:|---------------:|-----------------------:|-----------------------:|---------------:|---------------:|-------------:|----------------:|
+|  00000015 |    6854 |         0.8310 |         0.9488 |                 0.9463 |                 0.9980 |         0.6802 |         0.8867 |            0 |          2.1050 |
+|  00000017 |    1346 |         0.9391 |         0.9309 |                 0.8528 |                 0.8699 |         0.8463 |         0.8486 |            0 |          2.0920 |
+|  00000023 |     458 |         0.9432 |         0.9585 |                 0.9672 |                 0.9869 |         0.8889 |         0.8814 |            0 |          0.3270 |
+|  00000030 |     654 |         0.8349 |         0.8869 |                 0.8331 |                 0.9142 |         0.7740 |         0.8094 |            0 |          0.6640 |
+|  00000049 |    2642 |         0.9928 |         0.9962 |                 0.9860 |                 0.9943 |         0.9669 |         0.9801 |            0 |          1.4630 |
+|  00000059 |    1031 |         0.9641 |         0.9661 |                 0.9000 |                 0.9301 |         0.8325 |         0.8614 |            0 |          1.0700 |
+|  00000067 |     916 |         0.9640 |         0.9651 |                 0.9792 |                 0.9913 |         0.9367 |         0.9419 |            0 |          0.3480 |
+|  00000073 |    1144 |         0.9860 |         0.9869 |                 0.9834 |                 0.9913 |         0.9701 |         0.9764 |            0 |          0.8990 |
+|  00000087 |    1399 |         0.9600 |         0.9843 |                 0.9449 |                 0.9886 |         0.9349 |         0.9621 |            0 |          2.2150 |
+|  00000094 |    3230 |         0.9421 |         0.9514 |                 0.9470 |                 0.9789 |         0.9404 |         0.9430 |            0 |          1.7860 |
+
+## 6. Figures and maps
 
 - `reports/figures/bayes_opt_history.png`
 - `reports/figures/cm_DecisionTree.png`
@@ -97,6 +119,7 @@ Decoder configuration: `{"beta": 1.0, "emission_weight": 1.0, "backward_penalty"
 - `reports/figures/eda_road_network_trip.png`
 - `reports/figures/eda_sampling_intervals.png`
 - `reports/figures/eda_trip_distributions.png`
+- `reports/figures/eval_hmm_vs_classifier.png`
 - `reports/figures/hmm_vs_classifier.png`
 - `reports/figures/mlp_training_curve.png`
 - `reports/maps/eda_trip_00000001.html` (interactive Folium)
