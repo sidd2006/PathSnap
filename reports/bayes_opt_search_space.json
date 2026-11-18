@@ -1,0 +1,59 @@
+{
+  "sampler": "TPE (Optuna)",
+  "n_trials": 30,
+  "objective": "mean 3-fold GroupKFold Top-1",
+  "search_space": {
+    "n_estimators": [
+      "int",
+      100,
+      900
+    ],
+    "learning_rate": [
+      "float_log",
+      0.01,
+      0.2
+    ],
+    "num_leaves": [
+      "int",
+      15,
+      255
+    ],
+    "min_child_samples": [
+      "int",
+      10,
+      300
+    ],
+    "subsample": [
+      "float",
+      0.5,
+      1.0
+    ],
+    "colsample_bytree": [
+      "float",
+      0.5,
+      1.0
+    ],
+    "reg_lambda": [
+      "float_log",
+      0.001,
+      10.0
+    ],
+    "reg_alpha": [
+      "float_log",
+      0.001,
+      10.0
+    ]
+  },
+  "search_seconds": 1532.960043668747,
+  "best_value": 0.8957969471753454,
+  "best_params": {
+    "n_estimators": 581,
+    "learning_rate": 0.08341106432362087,
+    "num_leaves": 19,
+    "min_child_samples": 292,
+    "subsample": 0.9162213204002109,
+    "colsample_bytree": 0.6061695553391381,
+    "reg_lambda": 0.005337032762603957,
+    "reg_alpha": 0.00541524411940254
+  }
+}
