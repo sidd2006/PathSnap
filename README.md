@@ -1,105 +1,252 @@
-# PathSnap – Map-matching & Route Reconstruction
+<div align="center">
 
-UE24CS352A Machine Learning hackathon (PES University, RR campus).
-PathSnap matches noisy ~1 Hz GPS tracks to a road network: a classifier scores
-candidate road arcs for every GPS fix, and an HMM with Viterbi decoding turns those
-scores into a connected route. A FastAPI service (Laptop 1) runs the pipeline and a
-Streamlit UI (Laptop 2) lets the evaluator pick a trip and view the result.
+# PathSnap
 
-Team and ownership: see [TEAM.md](TEAM.md).
+**Machine-learning map-matching and route reconstruction for noisy GPS trajectories**
+
+![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
+![LightGBM](https://img.shields.io/badge/model-LightGBM%20(Bayesian--tuned)-2E7D32)
+![HMM](https://img.shields.io/badge/decoder-HMM%20%2B%20Viterbi-6A1B9A)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+
+UE24CS352A Machine Learning · PathSnap hackathon · PES University, RR Campus
+
+</div>
+
+---
+
+GPS fixes drift onto parallel streets, jump across buildings and drop out. PathSnap snaps a
+~1 Hz GPS trace back onto the road network in two stages:
+
+1. **Candidate scoring.** For every GPS fix, the nearby road arcs become candidates. A gradient-boosted
+   classifier estimates the probability that each candidate is the road actually driven.
+2. **Sequence decoding.** A Hidden Markov Model combines these probabilities with road-network
+   connectivity. Viterbi decoding then picks the most likely *connected* route.
+
+The trained pipeline runs as a **FastAPI** service on one laptop. A **Streamlit** UI on a second laptop
+lets the evaluator pick any trip and see the reconstructed route with its score.
+
+<p align="center"><img src="docs/ui_screenshot.jpg" width="820" alt="PathSnap evaluator UI showing a reconstructed route for trip 00000056"></p>
+
+## Headline results (10 student-test trips, never used for training)
+
+| | Classifier only | **Classifier + HMM** |
+|---|---|---|
+| Pointwise accuracy (observation-weighted) | 90.0 % | **94.3 %** |
+| Route continuity | 94.4 % | **97.9 %** |
+| Route F1 (traversed-arc set vs reference) | 90.4 % | **93.5 %** |
+| Trips with accuracy ≥ 95 % | 3 / 10 | **6 / 10** |
+| Pipeline time per trip (laptop CPU) | | **0.1–1.7 s** |
+
+All numbers come from `reports/` and can be regenerated with the scripts below.
+
+---
+
+## Contents
+
+- [How it works](#how-it-works)
+- [Dataset](#dataset)
+- [Experiments](#experiments)
+- [Repository layout](#repository-layout)
+- [Quick start](#quick-start)
+- [Two-laptop deployment](#two-laptop-deployment)
+- [API reference](#api-reference)
+- [Evaluation integrity](#evaluation-integrity)
+- [Team](#team)
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[".track / .nodes / .arcs<br/>raw trip files"] --> B["Clean + project<br/>(local metres)"]
+    B --> C["Candidate arcs<br/>KD-tree, 50 m → 120 m, top 12"]
+    C --> D["21 features per<br/>(GPS fix, arc)"]
+    D --> E["LightGBM<br/>P(arc is driven road)"]
+    E --> F["HMM + Viterbi<br/>Dijkstra transitions"]
+    F --> G["Route: one arc<br/>per GPS fix"]
+    G --> H["FastAPI /predict"]
+    H --> I["Streamlit UI<br/>+ Folium map"]
+    R[".route (reference)"] -. server-side scoring only .-> H
+```
+
+| Stage | What happens | Code |
+|---|---|---|
+| Cleaning | Drop non-finite or out-of-range fixes; sort by time; remove duplicate timestamps | `src/pathsnap/io.py` |
+| Projection | Local equirectangular frame in metres around each trip (distortion < 0.1 % at city scale) | `src/pathsnap/geo.py` |
+| Road network | Corridor pruning, KD-tree over arc points sampled every 8 m, Dijkstra with cutoff | `src/pathsnap/network.py` |
+| Labels | Monotone dynamic programme aligning `.route` arcs to GPS fixes (training and scoring only) | `src/pathsnap/labels.py` |
+| Features | Distance and rank, Gaussian prior, heading vs arc bearing, speed, time gaps, ±3-fix context distance, arc length, projection position, node degrees, two-way flag | `src/pathsnap/features.py` |
+| Classifier | Bayesian-tuned LightGBM, binary *is-reference-arc* | `src/pathsnap/models.py`, `scripts/04_bayes_opt.py` |
+| Decoder | States = candidate arcs; emissions = renormalised classifier probabilities; transitions = exp(−\|d<sub>network</sub> − d<sub>GPS</sub>\| / β√Δt); chain restarts at disconnected steps | `src/pathsnap/hmm.py` |
+
+## Dataset
+
+| Partition | Trips | GPS fixes | Use |
+|---|---|---|---|
+| Train | 80 | 208,417 | fitting, cross-validation, Bayesian optimisation, decoder tuning |
+| Student test | 10 | 19,160 | development-stage comparison |
+| Evaluator test | 10 | | final evaluation only (never seen during development) |
+
+Things we found while exploring the data (`scripts/01_eda.py`, `reports/eda/`):
+
+- **Sampling.** 94 % of steps are exactly 1 s apart. Some trips have large gaps, up to 42 h within one trip (trip 90).
+- **Per-trip road networks.** Each trip ships its own network (24k nodes and 48k arcs on average in train) with no isolated nodes. Arc ids only mean something within their own trip.
+- **Imperfect reference routes.** On trips 33 and 54 the reference route sits a median 120–140 m away from the GPS track. We treat these as label errors: observations more than 60 m from their aligned reference arc are left out of training.
+- **Candidate recall.** The reference arc appears in the candidate set for 99.8 % of student-test fixes (candidate miss rate 0.2 %).
+
+## Experiments
+
+### Seven candidate classifiers
+
+Protocol: 5-fold `GroupKFold` grouped by trip on the 80 training trips, then a refit on all of them and
+evaluation on the 10 student-test trips. Macro F1 and log loss are measured on candidates. Top-1 is
+measured per observation.
+
+| Model | Family | CV Macro F1 | CV Top-1 | Test Top-1 | Test Macro F1 | Log loss | Route continuity |
+|---|---|---|---|---|---|---|---|
+| **LightGBM** | Boosting | 0.940 ± 0.016 | 0.894 | **0.900** | **0.938** | 0.070 | 0.941 |
+| Random Forest | Bagging ensemble | 0.940 ± 0.016 | 0.895 | 0.895 | 0.936 | 0.068 | 0.937 |
+| MLP (64-32) | Neural network | 0.936 ± 0.016 | 0.893 | 0.888 | 0.933 | 0.072 | 0.941 |
+| Decision Tree | Tree | 0.932 ± 0.018 | 0.886 | 0.888 | 0.930 | 0.083 | 0.933 |
+| Logistic Regression | Linear | 0.934 ± 0.015 | 0.890 | 0.885 | 0.930 | 0.088 | 0.933 |
+| KNN (k = 25) | Instance-based | 0.933 ± 0.015 | 0.884 | 0.879 | 0.927 | 0.112 | 0.925 |
+| Gaussian NB | Probabilistic | 0.900 ± 0.013 | 0.868 | 0.857 | 0.887 | 0.449 | 0.917 |
+
+**Why LightGBM.** It is statistically tied with Random Forest in cross-validation. It is best on
+student-test Top-1 and Macro F1, its probabilities are well calibrated for the HMM, and it trains on all
+1.37 M rows in about 20 s, against about 100 s for Random Forest. Plots: `reports/figures/cmp_*.png`.
+Confusion matrices: `cm_*.png`. MLP training curve: `mlp_training_curve.png`.
+
+### Bayesian hyper-parameter optimisation
+
+We ran Optuna's TPE sampler for 30 trials. The objective was mean 3-fold `GroupKFold` Top-1, and the
+search covered 8 hyper-parameters (trees, learning rate, leaves, minimum child samples, row and column
+subsampling, L1 and L2 regularisation).
+
+| | CV Macro F1 | CV Top-1 | Test Top-1 | Test Macro F1 | Log loss |
+|---|---|---|---|---|---|
+| LightGBM untuned | 0.9396 | 0.8943 | 0.9001 | 0.9382 | 0.0696 |
+| **LightGBM tuned** | **0.9404** | **0.8969** | **0.9002** | **0.9384** | **0.0662** |
+
+The gain is small but consistent. The clearest improvement is in log loss, which matters because
+the decoder consumes these probabilities. The full trial log is in `reports/bayes_opt_trials.csv`.
+
+### HMM decoder
+
+The decoder was tuned on 12 *held-out training trips*, scored with a classifier that never saw them.
+Viterbi's arg-max depends only on the product β × emission weight: a first 5 × 3 grid gave identical
+accuracy for equal products (`reports/hmm_tuning_grid_beta_x_w.csv`). The final search therefore runs
+over β alone, from 0.125 to 32. Accuracy peaks at β = 1, in the middle of that range
+(`reports/hmm_tuning.csv`). Per-trip comparisons and interactive maps are in
+`reports/hmm_vs_classifier.csv` and `reports/maps/pred_<trip>.html`.
 
 ## Repository layout
 
 ```
-src/pathsnap/        core library
-  io.py              raw file loading + GPS cleaning
-  geo.py             local metric projection, point-to-segment geometry
-  network.py         per-trip road network, spatial index, Dijkstra
-  labels.py          monotone DP aligning the reference route to GPS fixes (training/scoring only)
-  features.py        candidate generation + feature engineering
-  models.py          the 7 candidate classifiers compared
-  metrics.py         macro-F1, log loss, Top-1, route continuity, route-set scores
-  hmm.py             HMM / Viterbi decoder
-  pipeline.py        raw trip -> candidates -> classifier -> HMM (+ separate server-side scoring)
-  viz.py             Folium maps of matched trips
-scripts/
-  01_eda.py          dataset inventory, missing values, gaps, network connectivity, plots, EDA Folium map
-  02_build_features.py  candidate/feature tables for train + student_test
-  03_train_models.py    5-fold GroupKFold + student-test evaluation of all models
-  04_bayes_opt.py       Optuna (TPE) tuning of the selected model, tuned vs untuned
-  05_hmm_eval.py        decoder tuning, classifier-only vs classifier+HMM, prediction maps
-api/main.py          FastAPI backend (Laptop 1)
-ui/app.py            Streamlit evaluator UI (Laptop 2)
-artifacts/           final_model.joblib, final_model_meta.json, hmm_config.json
-reports/             CSV results, experiment log, figures/, maps/ (interactive Folium HTML), eda/
+PathSnap/
+├── src/pathsnap/          core library (io, geo, network, labels, features, models, metrics, hmm, pipeline, viz)
+├── scripts/               01_eda → 02_build_features → 03_train_models → 04_bayes_opt → 05_hmm_eval → 06_results_summary
+├── api/main.py            FastAPI backend   (Laptop 1)
+├── ui/app.py              Streamlit UI      (Laptop 2)
+├── artifacts/             final_model.joblib · final_model_meta.json · hmm_config.json
+├── reports/               result CSVs, experiment log, figures/, maps/ (Folium HTML), eda/, RESULTS.md
+├── docs/                  screenshots
+├── requirements.txt
+└── TEAM.md                ownership and viva checklist
 ```
 
-## Setup
-
-Python 3.11 recommended.
+## Quick start
 
 ```bash
+git clone https://github.com/sidd2006/PathSnap.git
+cd PathSnap
 python -m venv .venv
-.venv\Scripts\activate          # Windows  (source .venv/bin/activate on Linux/macOS)
+.venv\Scripts\activate                 # Windows   |   source .venv/bin/activate  (Linux/macOS)
 pip install -r requirements.txt
 ```
 
-Put the organiser data under `data/` (not committed):
+Place the organiser data (not committed) like this:
 
 ```
 data/train/<trip_id>/<trip_id>.{track,nodes,arcs,route}
-data/student_test/<trip_id>/...
+data/student_test/<trip_id>/<trip_id>.{track,nodes,arcs,route}
 ```
 
-## Reproducing the experiments
+Reproduce every result. Seeds are fixed at 42. Runtimes are for a 6-core laptop CPU; no GPU is needed.
 
 ```bash
-python scripts/01_eda.py              # EDA tables, figures, Folium map
-python scripts/02_build_features.py   # candidate tables -> cache/
-python scripts/03_train_models.py     # 7 models, CV + student-test -> reports/model_comparison.csv
-python scripts/04_bayes_opt.py        # Bayesian optimisation -> artifacts/final_model.joblib
-python scripts/05_hmm_eval.py         # HMM tuning + comparison -> artifacts/hmm_config.json, reports/maps/
+python scripts/01_eda.py               # ~1 min   dataset inventory, plots, EDA Folium map
+python scripts/02_build_features.py    # ~1 min   candidate + feature tables  -> cache/
+python scripts/03_train_models.py      # ~35 min  7 models, CV + student test -> reports/model_comparison.csv
+python scripts/04_bayes_opt.py         # ~30 min  Optuna TPE                  -> artifacts/final_model.joblib
+python scripts/05_hmm_eval.py          # ~8 min   decoder tuning + comparison -> artifacts/hmm_config.json
+python scripts/06_results_summary.py   # seconds  reports/RESULTS.md
 ```
 
-Seeds are fixed (`SEED = 42`). Every run appends to `reports/experiment_log.jsonl`.
+The trained model and decoder config are already committed, so you can skip straight to deployment.
 
-## Deployment (two laptops)
+## Two-laptop deployment
 
-**Laptop 1 – model + API**
+**Laptop 1: model + API**
 
 ```bash
-set PATHSNAP_EVAL_DIR=C:\path\to\evaluator_trips      # folder with the 10 evaluation trips
+set PATHSNAP_EVAL_DIR=D:\evaluator_trips          # folder holding the 10 evaluation trips
 uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-`GET /trips` lists trip ids, `POST /predict {"trip_id": "..."}` runs the whole pipeline and
-returns the predicted route, nearby road geometry and server-side scores. Each request is
-logged in the terminal (trip, accuracy, continuity, time) – show this window to the evaluator.
-Allow port 8000 through the Windows firewall and find the LAN IP with `ipconfig`.
+Find the LAN IP with `ipconfig` and allow port 8000 through Windows Defender Firewall. Every request is
+logged in this terminal; show it to the evaluator:
 
-**Laptop 2 – UI**
+```
+INFO | POST /predict trip=00000056 : obs=3958  HMM acc=0.9576  classifier acc=0.9179  continuity=0.9656  route F1=0.9346  (2.12s)
+```
+
+**Laptop 2: UI**
 
 ```bash
 set PATHSNAP_API=http://<laptop-1-ip>:8000
 streamlit run ui/app.py
 ```
 
-## Leakage safeguards
+The UI lists the evaluation trips, sends the chosen id to the API and draws the GPS fixes, nearby road
+network and predicted route on a Folium map with layer controls. To check the API from either laptop:
+`python scripts/api_smoke_test.py http://<laptop-1-ip>:8000`.
 
-- Trips never cross partitions; CV uses `GroupKFold` grouped by trip.
-- All learned choices (features, model, hyper-parameters, decoder β / emission weight) use the
-  80 training trips and the 10 student-test trips only.
-- `pipeline.predict_trip` never reads `.route`. The API loads the reference route only after
-  prediction, uses it only to compute the score, and never sends it to the UI.
-- No trip ids or predictions are hard-coded anywhere.
+## API reference
 
-## Results
+| Method | Path | Body | Returns |
+|---|---|---|---|
+| `GET` | `/health` | | status, loaded model, decoder config |
+| `GET` | `/trips` | | `{"trips": [ids…]}` |
+| `POST` | `/predict` | `{"trip_id": "00000056"}` | GPS fixes, predicted route and classifier-only route polylines, nearby road network, predicted arc per fix, server-side metrics, decoder diagnostics, timing |
 
-See `reports/RESULTS.md` (generated from the CSVs in `reports/`).
+Interactive docs are served at `http://<host>:8000/docs`.
 
-## AI-assistance disclosure
+## Evaluation integrity
 
-Parts of this codebase were written with the help of an AI coding assistant (Claude);
-commits containing AI-assisted code carry a `Co-Authored-By: Claude` trailer. All experiments
-were actually run and every number in `reports/` comes from those runs. Each team member has
-reviewed the part listed for them in TEAM.md and is responsible for explaining it.
+- **No trip leakage.** Trips never cross partitions, and all cross-validation is grouped by trip.
+- **No test-driven choices.** The features, model, hyper-parameters and decoder β were all chosen
+  using only the training and student-test trips.
+- **Labels stay on the server.** `pipeline.predict_trip` never reads `.route`. The API loads the
+  reference route only *after* predicting, uses it only to compute the score, and never sends it to the UI.
+- **No hard-coding.** No trip ids, routes or predictions appear anywhere in the code; every request runs
+  the full pipeline.
+
+## Team
+
+| Member | GitHub | Owns |
+|---|---|---|
+| Shryes | [@Shryes19](https://github.com/Shryes19) | data loading, cleaning, EDA, results summary |
+| Shubham Bhat | [@Shubhambhat06](https://github.com/Shubhambhat06) | road network, candidate generation, labelling, feature engineering |
+| Siddhant Anil | [@SiRex750](https://github.com/SiRex750) | model zoo, metrics, model comparison, Bayesian optimisation |
+| Siddhant Khurdiya | [@sidd2006](https://github.com/sidd2006) | HMM/Viterbi, inference pipeline, FastAPI, Streamlit UI, deployment |
+
+Branch-by-branch ownership and each member's viva checklist are in [TEAM.md](TEAM.md).
+
+### AI-assistance disclosure
+
+Parts of this codebase were written with an AI coding assistant (Claude). Commits that contain
+AI-assisted work carry a `Co-Authored-By: Claude` trailer. Every experiment was actually run, and
+every number in this README and in `reports/` comes from those runs. Each member has reviewed the part
+listed for them in TEAM.md and can explain it.
