@@ -33,8 +33,12 @@ from pathsnap.models import SEED  # noqa: E402
 from pathsnap.pipeline import evaluate_trip, predict_trip  # noqa: E402
 from pathsnap.viz import trip_map  # noqa: E402
 
-BETAS = [2.0, 4.0, 8.0, 16.0, 32.0]
-EMIS_W = [0.5, 1.0, 2.0]
+# Viterbi's arg-max is unchanged when every log-score is multiplied by a constant, and the
+# score of a path is  w * sum(log e) - sum(|d_route - d_gps|) / beta.  Dividing by w shows that
+# only the product beta * w matters, so we fix w = 1 and search beta over a wide log range
+# (a first 5x3 grid over beta and w confirmed it: equal products gave identical accuracy).
+BETAS = [0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
+EMIS_W = [1.0]
 
 
 def tune():
