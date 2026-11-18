@@ -11,4 +11,4 @@ __pycache__/
 .ipynb_checkpoints/
 .streamlit/secrets.toml
 .env
-*_log.txt
+/*_log.txt

@@ -30,13 +30,14 @@
   L.control.zoom({ position: "bottomleft" }).addTo(map);
   const canvas = L.canvas({ padding: 0.5 });
 
-  // Keyless basemaps: Esri gray canvases (quiet, label-light), OpenStreetMap as fallback.
+  // Keyless basemaps: Esri gray canvases (quiet, label-light), Esri streets as fallback.
+  // (tile.openstreetmap.org answers "Access blocked" to pages like this one.)
   const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
   const esriAttr = "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors";
   const tileSets = {
     light: [`${esri}World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, esriAttr, 16],
     dark: [`${esri}World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, esriAttr, 16],
-    osm: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png", "&copy; OpenStreetMap contributors", 19],
+    osm: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", esriAttr, 19],
   };
   let tiles = null, tileErrors = 0;
   function setTiles(kind) {

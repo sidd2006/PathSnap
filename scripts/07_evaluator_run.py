@@ -23,6 +23,7 @@ import requests
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from pathsnap import config  # noqa: E402
+from pathsnap.viz import base_map  # noqa: E402
 
 API = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000").rstrip("/")
 OUT = os.path.join(config.REPORTS, "evaluator_test")
@@ -38,7 +39,7 @@ def sha256(path):
 def save_map(res, path):
     gps = res["gps"]
     lats, lons = [p[0] for p in gps], [p[1] for p in gps]
-    m = folium.Map(location=[sum(lats) / len(lats), sum(lons) / len(lons)], zoom_start=14, control_scale=True)
+    m = base_map([sum(lats) / len(lats), sum(lons) / len(lons)], zoom_start=14)
     g = folium.FeatureGroup("Road network (candidate arcs)")
     for line in res["road_network"]:
         folium.PolyLine(line, color="#8c8c8c", weight=1.5, opacity=0.6).add_to(g)

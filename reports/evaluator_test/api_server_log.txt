@@ -1,0 +1,139 @@
+INFO:     127.0.0.1:56972 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56976 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56981 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:24:15,104 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:56984 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:24:19,255 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (2.10s)
+INFO:     127.0.0.1:56987 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:26,937 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (2.09s)
+INFO:     127.0.0.1:56989 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:31,935 | INFO | POST /predict trip=00000023 : obs=458  HMM acc=0.9585  classifier acc=0.9432  continuity=0.9869  route F1=0.8814  (0.33s)
+INFO:     127.0.0.1:56992 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:35,143 | INFO | POST /predict trip=00000030 : obs=654  HMM acc=0.8869  classifier acc=0.8349  continuity=0.9142  route F1=0.8094  (0.66s)
+INFO:     127.0.0.1:56994 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:39,803 | INFO | POST /predict trip=00000049 : obs=2642  HMM acc=0.9962  classifier acc=0.9928  continuity=0.9943  route F1=0.9801  (1.46s)
+INFO:     127.0.0.1:56996 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:45,278 | INFO | POST /predict trip=00000059 : obs=1031  HMM acc=0.9661  classifier acc=0.9641  continuity=0.9301  route F1=0.8614  (1.07s)
+INFO:     127.0.0.1:56998 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:49,239 | INFO | POST /predict trip=00000067 : obs=916  HMM acc=0.9651  classifier acc=0.9640  continuity=0.9913  route F1=0.9419  (0.35s)
+INFO:     127.0.0.1:57002 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:52,810 | INFO | POST /predict trip=00000073 : obs=1144  HMM acc=0.9869  classifier acc=0.9860  continuity=0.9913  route F1=0.9764  (0.90s)
+INFO:     127.0.0.1:57005 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:24:58,418 | INFO | POST /predict trip=00000087 : obs=1399  HMM acc=0.9843  classifier acc=0.9600  continuity=0.9886  route F1=0.9621  (2.21s)
+INFO:     127.0.0.1:61504 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:25:04,495 | INFO | POST /predict trip=00000094 : obs=3230  HMM acc=0.9514  classifier acc=0.9421  continuity=0.9789  route F1=0.9430  (1.79s)
+INFO:     127.0.0.1:61507 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53646 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:25:21,801 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:53648 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54336 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63113 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:48:54,760 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:63113 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:49:11,818 | INFO | POST /predict trip=00000087 : obs=1399  HMM acc=0.9843  classifier acc=0.9600  continuity=0.9886  route F1=0.9621  (2.06s)
+INFO:     127.0.0.1:63662 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49964 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:51:46,980 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:49964 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63186 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:52:01,257 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:63186 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:52:06,520 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (2.01s)
+INFO:     127.0.0.1:63186 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62353 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:52:29,041 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:62353 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:52:34,003 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (1.97s)
+INFO:     127.0.0.1:62353 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51536 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:53:13,587 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:51536 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:53:18,775 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (1.92s)
+INFO:     127.0.0.1:51536 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62293 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:54:30,408 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:62293 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:54:35,340 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.94s)
+INFO:     127.0.0.1:62293 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 15:56:04,228 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.87s)
+INFO:     127.0.0.1:49890 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61601 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:57:18,607 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:61601 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:57:24,421 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.86s)
+INFO:     127.0.0.1:61601 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57982 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:58:27,381 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:57982 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 15:58:42,517 | INFO | POST /predict trip=00000087 : obs=1399  HMM acc=0.9843  classifier acc=0.9600  continuity=0.9886  route F1=0.9621  (2.04s)
+INFO:     127.0.0.1:64032 - "POST /predict HTTP/1.1" 200 OK
+INFO:     10.8.120.177:60036 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:59:45,075 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:60044 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.120.177:60062 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 15:59:53,552 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:60063 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.120.177:60079 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:00:10,796 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:60080 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.120.177:60083 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:00:13,777 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:60085 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:00:16,442 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.84s)
+INFO:     10.8.120.177:60087 - "POST /predict HTTP/1.1" 200 OK
+INFO:     10.8.120.177:58818 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:01:11,858 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:51703 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.121.104:61333 - "GET / HTTP/1.1" 404 Not Found
+INFO:     10.8.121.104:61333 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     10.8.120.177:51711 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:01:25,129 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:51714 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.120.177:58877 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:01:32,007 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:58878 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59814 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:03:14,897 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:59815 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:03:40,365 | INFO | POST /predict trip=00000087 : obs=1399  HMM acc=0.9843  classifier acc=0.9600  continuity=0.9886  route F1=0.9621  (1.94s)
+INFO:     127.0.0.1:56121 - "POST /predict HTTP/1.1" 200 OK
+INFO:     10.8.121.104:51838 - "GET / HTTP/1.1" 404 Not Found
+2026-11-18 16:04:47,804 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:56357 - "GET /trips HTTP/1.1" 200 OK
+INFO:     10.8.120.177:56368 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:04:51,722 | INFO | GET /trips -> 10 trips
+INFO:     10.8.120.177:56368 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61927 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:05:34,305 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:61927 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57009 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57009 - "GET /openapi.json HTTP/1.1" 200 OK
+2026-11-18 16:06:39,478 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.97s)
+INFO:     10.8.120.177:53567 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:07:50,734 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (1.90s)
+INFO:     10.8.120.177:64667 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:13:19,815 | INFO | POST /predict trip=00000023 : obs=458  HMM acc=0.9585  classifier acc=0.9432  continuity=0.9869  route F1=0.8814  (0.34s)
+INFO:     10.8.120.177:56108 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50709 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 16:41:53,183 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:50711 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:41:57,142 | INFO | POST /predict trip=00000015 : obs=6854  HMM acc=0.9488  classifier acc=0.8310  continuity=0.9980  route F1=0.8867  (1.92s)
+INFO:     127.0.0.1:50713 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:03,869 | INFO | POST /predict trip=00000017 : obs=1346  HMM acc=0.9309  classifier acc=0.9391  continuity=0.8699  route F1=0.8486  (1.84s)
+INFO:     127.0.0.1:59752 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:07,987 | INFO | POST /predict trip=00000023 : obs=458  HMM acc=0.9585  classifier acc=0.9432  continuity=0.9869  route F1=0.8814  (0.34s)
+INFO:     127.0.0.1:59755 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:11,150 | INFO | POST /predict trip=00000030 : obs=654  HMM acc=0.8869  classifier acc=0.8349  continuity=0.9142  route F1=0.8094  (0.72s)
+INFO:     127.0.0.1:59757 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:15,465 | INFO | POST /predict trip=00000049 : obs=2642  HMM acc=0.9962  classifier acc=0.9928  continuity=0.9943  route F1=0.9801  (1.46s)
+INFO:     127.0.0.1:59759 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:20,097 | INFO | POST /predict trip=00000059 : obs=1031  HMM acc=0.9661  classifier acc=0.9641  continuity=0.9301  route F1=0.8614  (1.00s)
+INFO:     127.0.0.1:59761 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:23,662 | INFO | POST /predict trip=00000067 : obs=916  HMM acc=0.9651  classifier acc=0.9640  continuity=0.9913  route F1=0.9419  (0.40s)
+INFO:     127.0.0.1:59763 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:27,127 | INFO | POST /predict trip=00000073 : obs=1144  HMM acc=0.9869  classifier acc=0.9860  continuity=0.9913  route F1=0.9764  (0.95s)
+INFO:     127.0.0.1:59765 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:31,978 | INFO | POST /predict trip=00000087 : obs=1399  HMM acc=0.9843  classifier acc=0.9600  continuity=0.9886  route F1=0.9621  (1.95s)
+INFO:     127.0.0.1:59771 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 16:42:37,126 | INFO | POST /predict trip=00000094 : obs=3230  HMM acc=0.9514  classifier acc=0.9421  continuity=0.9789  route F1=0.9430  (1.57s)
+INFO:     127.0.0.1:63371 - "POST /predict HTTP/1.1" 200 OK

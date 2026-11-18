@@ -52,7 +52,12 @@ if res:
 
     gps = res["gps"]
     lats, lons = [p[0] for p in gps], [p[1] for p in gps]
-    fmap = folium.Map(location=[sum(lats) / len(lats), sum(lons) / len(lons)], zoom_start=14, control_scale=True)
+    fmap = folium.Map(location=[sum(lats) / len(lats), sum(lons) / len(lons)], zoom_start=14, control_scale=True,
+                      tiles=None)
+    # keyless Esri basemap; the default OpenStreetMap server blocks these tile requests
+    folium.TileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+                     attr="Tiles &copy; Esri, &copy; OpenStreetMap contributors", name="Light gray",
+                     max_native_zoom=16, max_zoom=19).add_to(fmap)
     net = folium.FeatureGroup("Road network (candidate arcs)")
     for line in res["road_network"]:
         folium.PolyLine(line, color="#8c8c8c", weight=1.5, opacity=0.6).add_to(net)

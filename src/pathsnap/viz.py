@@ -5,6 +5,21 @@ import folium
 import numpy as np
 
 
+ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/"
+ESRI_ATTR = "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors"
+
+
+def base_map(location, zoom_start=15) -> folium.Map:
+    """Folium map on keyless Esri basemaps. The default OpenStreetMap tile server answers
+    "Access blocked" (HTTP 418) to pages like these, which left the maps blank."""
+    m = folium.Map(location=location, zoom_start=zoom_start, tiles=None, control_scale=True)
+    folium.TileLayer(f"{ESRI}Canvas/World_Light_Gray_Base/MapServer/tile/{{z}}/{{y}}/{{x}}", attr=ESRI_ATTR,
+                     name="Light gray", max_native_zoom=16, max_zoom=19).add_to(m)
+    folium.TileLayer(f"{ESRI}World_Street_Map/MapServer/tile/{{z}}/{{y}}/{{x}}", attr=ESRI_ATTR,
+                     name="Streets", max_native_zoom=19, max_zoom=19, show=False).add_to(m)
+    return m
+
+
 def _arc_lines(nodes, arcs, ids):
     out, prev = [], None
     for e in ids:
@@ -18,7 +33,7 @@ def _arc_lines(nodes, arcs, ids):
 
 def trip_map(trip, track, layers: dict, corridor_arcs=None, title: str = "") -> folium.Map:
     """layers: {name: (arc_id_sequence, colour)}; corridor_arcs: arc ids drawn grey."""
-    m = folium.Map(location=[track[:, 1].mean(), track[:, 0].mean()], zoom_start=15, control_scale=True)
+    m = base_map([track[:, 1].mean(), track[:, 0].mean()])
     if corridor_arcs is not None:
         g = folium.FeatureGroup("Road network (candidates)", show=True)
         for line in _arc_lines(trip.nodes, trip.arcs, np.unique(corridor_arcs)):
