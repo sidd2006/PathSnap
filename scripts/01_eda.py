@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from pathsnap import config  # noqa: E402
 from pathsnap.geo import LocalProjection, haversine  # noqa: E402
 from pathsnap.io import clean_track, list_trips, load_trip  # noqa: E402
+from pathsnap.viz import base_map  # noqa: E402
 
 EDA = os.path.join(config.REPORTS, "eda")
 os.makedirs(EDA, exist_ok=True)
@@ -77,7 +78,7 @@ def folium_trip(root, tid, out_html):
     lo, hi = xy.min(0) - 150, xy.max(0) + 150
     a, b = nxy[tr.arcs[:, 0]], nxy[tr.arcs[:, 1]]
     inside = np.all((a >= lo) & (a <= hi) & (b >= lo) & (b <= hi), axis=1)
-    m = folium.Map(location=[track[:, 1].mean(), track[:, 0].mean()], zoom_start=15)
+    m = base_map([track[:, 1].mean(), track[:, 0].mean()])
     net = folium.FeatureGroup("Road network (corridor)")
     for f, t in tr.arcs[inside][:6000]:
         folium.PolyLine([[tr.nodes[f, 1], tr.nodes[f, 0]], [tr.nodes[t, 1], tr.nodes[t, 0]]],
