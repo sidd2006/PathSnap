@@ -17,7 +17,7 @@ UE24CS352A Machine Learning · PathSnap hackathon · PES University, RR Campus
 ---
 
 GPS fixes drift onto parallel streets, jump across buildings and drop out. PathSnap snaps a
-~1 Hz GPS trace back onto the road network in two0 stages:
+~1 Hz GPS trace back onto the road network in two stages:
 
 1. **Candidate scoring.** For every GPS fix, the nearby road arcs become candidates. A gradient-boosted
    classifier estimates the probability that each candidate is the road actually driven.
@@ -33,6 +33,12 @@ The frozen pipeline reached **95.89% pointwise accuracy** across **10 evaluator 
 [Editable handoff](docs/PathSnap-Team-Handoff.md)
 
 <p align="center"><img src="docs/ui_web.jpg" width="820" alt="PathSnap web UI: trip list, reconstructed route for evaluator trip 00000087 and results inspector showing 98.4% accuracy"></p>
+
+## Explore the project
+
+[Quick start](#quick-start) · [Architecture](#how-it-works) · [Final evaluation](#final-evaluation-10-evaluator-test-trips) · [Technical report](report/PathSnap_Technical_Report.pdf) · [Team](#team)
+
+The saved results and figures can be inspected from this checkout. Running predictions requires the organiser's trip files, which are excluded from Git.
 
 ## Headline results (10 student-test trips, never used for training)
 
@@ -211,7 +217,7 @@ PathSnap/
 The trained model and HMM configuration are included. Setup was verified on Windows with Python 3.13.2.
 
 ```powershell
-git clone git@github.com:sidd2006/PathSnap.git
+git clone https://github.com/sidd2006/PathSnap.git
 cd PathSnap
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
